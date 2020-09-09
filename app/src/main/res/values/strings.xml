@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">BasketballApp</string>
     <string name="reset_button">Reset</string>
+    <string name="save_button">Email</string>
     <string name="team_a_text">Team A</string>
     <string name="team_b_text">Team B</string>
     <string name="three_pnts_button">+3 Points</string>

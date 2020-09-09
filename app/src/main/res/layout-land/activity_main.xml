@@ -108,5 +108,21 @@
         android:layout_height="wrap_content"
         android:text="@string/reset_button"
         android:layout_gravity="center|bottom"/>
+
+    <EditText
+        style="@style/EditText"
+        android:id = "@+id/enter_text"
+        android:hint = "Enter email"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:gravity="center"/>
+
+    <Button
+        style="@style/CustomButton"
+        android:id="@+id/save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/save_button"
+        android:layout_gravity="center|bottom"/>
 </LinearLayout>
 </ScrollView>

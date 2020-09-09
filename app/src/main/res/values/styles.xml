@@ -24,4 +24,9 @@
         <item name="android:fontFamily">@font/abel</item>
         <item  name="android:textSize">25sp</item>
     </style>
+    <style name="EditText">
+        <item name="android:textColor">@color/textColorSurface</item>
+        <item name="android:fontFamily">@font/abel</item>
+        <item  name="android:textSize">25sp</item>
+    </style>
 </resources>
