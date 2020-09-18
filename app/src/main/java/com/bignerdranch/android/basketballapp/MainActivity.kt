@@ -15,13 +15,20 @@ class MainActivity : AppCompatActivity() {
 
         val currFrag = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
+//        if (currFrag == null) {
+//            val fragment = GameFragment()
+//            supportFragmentManager
+//                .beginTransaction()
+//                .add(R.id.fragment_container, fragment)
+//                .commit()
+//        }
         if (currFrag == null) {
-            val fragment = GameFragment()
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.fragment_container, fragment)
-                .commit()
-        }
+           val fragment = GameListFragment.newInstance()
+           supportFragmentManager
+               .beginTransaction()
+               .replace(R.id.fragment_container, fragment)
+               .commit()
+       }
     }
 
     override fun onStart() {

@@ -99,8 +99,8 @@ class GameFragment : Fragment() {
         }
 
         saveButton.setOnClickListener {
-            val teamAScore = gameViewModel.currentScoreA
-            val teamBScore = gameViewModel.currentScoreB
+            val scoreA = gameViewModel.currentScoreA
+            val scoreB = gameViewModel.currentScoreB
 
             var teamA = teamAName.text.toString()
             var teamB = teamBName.text.toString()
@@ -114,8 +114,8 @@ class GameFragment : Fragment() {
                     it1,
                     teamA,
                     teamB,
-                    teamAScore,
-                    teamBScore
+                    scoreA,
+                    scoreB
                 )
             }
             startActivityForResult(intent, REQUEST_CODE_SAVE)

@@ -7,7 +7,7 @@ private const val TAG =  "GameViewModel"
 
 class GameViewModel : ViewModel() {
 
-    private val game = Game(0, 0)
+    private val game = Game(0, 0, "TeamA", "TeamB", "", java.util.Calendar.getInstance())
 
     init {
         Log.d(TAG, "ViewModel instance created")
