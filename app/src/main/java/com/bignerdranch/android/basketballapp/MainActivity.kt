@@ -1,5 +1,6 @@
 package com.bignerdranch.android.basketballapp
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -19,9 +20,12 @@ import java.util.*
 private const val TAG = "MainActivity"
 private const val KEY_A_INDEX = "score_a"
 private const val KEY_B_INDEX = "score_b"
+private const val REQUEST_CODE_SAVE = 0
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var teamAName: EditText
+    private lateinit var teamBName: EditText
     private lateinit var threeAButton: Button
     private lateinit var threeBButton: Button
     private lateinit var twoAButton: Button
@@ -29,10 +33,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var freeAButton: Button
     private lateinit var freeBButton: Button
     private lateinit var resetButton: Button
-    private lateinit var saveButton: Button
     private lateinit var scoreATextView: TextView
     private lateinit var scoreBTextView: TextView
-    private lateinit var enterTextView: EditText
+    private lateinit var saveButton: Button
+    private lateinit var displayButton: Button
 
     private val gameViewModel: GameViewModel by lazy {
         ViewModelProviders.of(this).get(GameViewModel::class.java)
@@ -47,6 +51,8 @@ class MainActivity : AppCompatActivity() {
         val gameViewModel = provider.get(GameViewModel::class.java)
         Log.d(TAG, "Got a GameViewModel: $gameViewModel")
 
+        teamAName = findViewById(R.id.team_a_name)
+        teamBName = findViewById(R.id.team_b_name)
         threeAButton = findViewById(R.id.three_pnts_a_button)
         threeBButton = findViewById(R.id.three_pnts_b_button)
         twoAButton = findViewById(R.id.two_pnts_a_button)
@@ -54,10 +60,10 @@ class MainActivity : AppCompatActivity() {
         freeAButton = findViewById(R.id.free_throw_a_button)
         freeBButton = findViewById(R.id.free_throw_b_button)
         resetButton = findViewById(R.id.reset_button)
-        saveButton = findViewById(R.id.save_button)
         scoreATextView = findViewById(R.id.score_a_text)
         scoreBTextView = findViewById(R.id.score_b_text)
-        enterTextView = findViewById(R.id.enter_text)
+        saveButton = findViewById(R.id.save_button)
+        displayButton = findViewById(R.id.display_button)
 
         threeAButton.setOnClickListener { view: View ->
             updateScoreA(3)
@@ -87,9 +93,22 @@ class MainActivity : AppCompatActivity() {
             resetScores()
         }
 
-        saveButton.setOnClickListener { view: View ->
-            sendEmail()
+        saveButton.setOnClickListener {
+            val teamAScore = gameViewModel.currentScoreA
+            val teamBScore = gameViewModel.currentScoreB
+
+            var teamA = teamAName.text.toString()
+            var teamB = teamBName.text.toString()
+
+            if (teamA.trim().isEmpty())
+                teamA = "Team A"
+            if (teamB.trim().isEmpty())
+                teamA = "Team B"
+
+            val intent = SaveActivity.newIntent(this@MainActivity, teamA, teamB, teamAScore, teamBScore)
+            startActivityForResult(intent, REQUEST_CODE_SAVE)
         }
+
         val currScoreA = savedInstanceState?.getInt(KEY_A_INDEX, 0) ?: 0
         val currScoreB = savedInstanceState?.getInt(KEY_B_INDEX, 0) ?: 0
 
@@ -104,6 +123,23 @@ class MainActivity : AppCompatActivity() {
 
         savedInstanceState.putInt(KEY_A_INDEX,  gameViewModel.currentScoreA)
         savedInstanceState.putInt(KEY_B_INDEX,  gameViewModel.currentScoreB)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(TAG, "onActivityResult() called")
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        if (requestCode == REQUEST_CODE_SAVE) {
+            if (data!!.getBooleanExtra(EXTRA_Score_Saved, false )){
+                Toast.makeText(this, "Scores were \"saved\"", Toast.LENGTH_LONG)
+                    .show()
+                Log.d(TAG, "Toast shown")
+            }
+        }
     }
 
     override fun onStart() {
@@ -156,40 +192,5 @@ class MainActivity : AppCompatActivity() {
         scoreATextView.setText(scoreA.toString())
         scoreBTextView.setText(scoreB.toString())
     }
-    private fun sendEmail() {
-        val scoreA = gameViewModel.currentScoreA
-        val scoreB = gameViewModel.currentScoreB
 
-        if (!enterTextView.getText().toString().isEmpty()) {
-            val msg = Calendar.getInstance().getTime()
-                .toString() + "\nScore A: " + scoreA.toString() + "\nScore B: " + scoreB.toString()
-            Log.i("Email", "Sending email")
-
-            val TO = arrayOf(enterTextView.getText().toString())
-            val emailIntent = Intent(Intent.ACTION_SEND)
-            emailIntent.data = Uri.parse("mailto:")
-            emailIntent.type = "text/plain"
-
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, TO)
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Game Scores WOO!")
-            emailIntent.putExtra(Intent.EXTRA_TEXT, msg)
-
-            try {
-                startActivity(Intent.createChooser(emailIntent, "Send mail..."))
-                finish()
-                Log.i("Email.", "Sending email")
-            } catch (ex: ActivityNotFoundException) {
-                Toast.makeText(
-                    this@MainActivity,
-                    "There is no email client installed.", Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-        else{
-            Toast.makeText(
-                this@MainActivity,
-                "Enter email.", Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
 }

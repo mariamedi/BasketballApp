@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/MainText"
+                android:id="@+id/team_a_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:text="@string/team_a_text" />
+
+            <TextView
+                style="@style/ScoreText"
+                android:id="@+id/save_a_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:text="@string/score_a_text"  />
+
+        </LinearLayout>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/MainText"
+                android:id="@+id/team_b_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:text="@string/team_b_text" />
+
+            <TextView
+                style="@style/ScoreText"
+                android:id="@+id/save_b_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:text="@string/score_b_text" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <EditText
+        style="@style/EditText"
+        android:id = "@+id/enter_text"
+        android:hint = "Enter email"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:inputType="text|textMultiLine"
+        android:maxLines="2"
+        android:gravity="center"/>
+
+    <Button
+        style="@style/CustomButton"
+        android:id="@+id/email_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/email_button" />
+
+    <Button
+        style="@style/CustomButton"
+        android:id="@+id/back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/back_label" />
+
+</LinearLayout>
+</ScrollView>

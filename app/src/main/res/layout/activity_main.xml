@@ -16,11 +16,17 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <TextView
+            <EditText
                 style="@style/MainText"
+                android:id="@+id/team_a_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="24dp"
+                android:hint="@string/team_a_name"
+                android:inputType="text|textMultiLine"
+                android:maxLines="2"
+                android:maxLength="20"
+                android:maxWidth="170dp"
                 android:text="@string/team_a_text" />
 
             <TextView
@@ -59,11 +65,17 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <TextView
+            <EditText
                 style="@style/MainText"
+                android:id="@+id/team_b_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="24dp"
+                android:hint="@string/team_b_name"
+                android:inputType="text|textMultiLine"
+                android:maxLines="2"
+                android:maxLength="20"
+                android:maxWidth="170dp"
                 android:text="@string/team_b_text" />
 
             <TextView
@@ -99,26 +111,30 @@
 
     </LinearLayout>
 
-    <Button
-        style="@style/CustomButton"
-        android:id="@+id/reset_button"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/reset_button" />
+        android:orientation="horizontal">
 
-    <EditText
-        style="@style/EditText"
-        android:id = "@+id/enter_text"
-        android:hint = "Enter email"
-        android:layout_width = "match_parent"
-        android:layout_height = "wrap_content"
-        android:gravity="center"/>
+        <Button
+            style="@style/CustomButton"
+            android:id="@+id/reset_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset_button" />
+        <Button
+            style="@style/CustomButton"
+            android:id="@+id/save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save_text" />
+        <Button
+            style="@style/CustomButton"
+            android:id="@+id/display_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/display_text"/>
 
-    <Button
-        style="@style/CustomButton"
-        android:id="@+id/save_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/save_button" />
+    </LinearLayout>
 
 </LinearLayout>
