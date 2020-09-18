@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.util.*
 
-
 private const val EXTRA_TeamA_Name = "team_a_name"
 private const val EXTRA_TeamB_Name = "team_b_name"
 private const val EXTRA_TeamA_Score = "team_a_score"
