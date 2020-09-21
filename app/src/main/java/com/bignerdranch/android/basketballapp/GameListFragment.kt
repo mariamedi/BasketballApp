@@ -2,14 +2,18 @@ package com.bignerdranch.android.basketballapp
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Display
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.fragment_game.*
 
 private const val TAG = "GameListFragment"
 
@@ -57,12 +61,35 @@ class GameListFragment : Fragment() {
         private val gamePlayersText: TextView = itemView.findViewById(R.id.game_players)
         private val gameScoresText: TextView = itemView.findViewById(R.id.game_score)
 
+        private val teamAImageView: ImageView = itemView.findViewById(R.id.team_a_icon)
+        private val teamBImageView: ImageView = itemView.findViewById(R.id.team_b_icon)
+        private val tieImageView: ImageView = itemView.findViewById(R.id.tie_icon)
+
         fun bind(game: Game) {
             this.game = game
             gameNameText.setText(this.game.nameGame)
             gameDateText.setText(this.game.date.time.toString())
             gamePlayersText.setText(  "Team: " + this.game.nameA + " -- " + "Team: " + game.nameB)
             gameScoresText.setText(this.game.scoreA.toString() + " : " + game.scoreB)
+
+            if(this.game.scoreA > this.game.scoreB)
+            {
+                teamAImageView.visibility = View.VISIBLE
+                teamBImageView.visibility = View.GONE
+                tieImageView.visibility = View.GONE
+            }
+            else if(this.game.scoreB > this.game.scoreA)
+            {
+                teamBImageView.visibility = View.VISIBLE
+                teamAImageView.visibility = View.GONE
+                tieImageView.visibility = View.GONE
+            }
+            else{
+                teamBImageView.visibility = View.GONE
+                teamAImageView.visibility = View.GONE
+                tieImageView.visibility = View.VISIBLE
+            }
+
         }
     }
 
