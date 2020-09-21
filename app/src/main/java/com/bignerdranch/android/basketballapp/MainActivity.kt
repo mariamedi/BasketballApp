@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 private const val TAG = "MainActivity"
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), GameFragment.Callbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,20 +15,24 @@ class MainActivity : AppCompatActivity() {
 
         val currFrag = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
-//        if (currFrag == null) {
-//            val fragment = GameFragment()
-//            supportFragmentManager
-//                .beginTransaction()
-//                .add(R.id.fragment_container, fragment)
-//                .commit()
-//        }
         if (currFrag == null) {
-           val fragment = GameListFragment.newInstance()
-           supportFragmentManager
-               .beginTransaction()
-               .replace(R.id.fragment_container, fragment)
-               .commit()
-       }
+            val fragment = GameFragment()
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.fragment_container, fragment)
+                .commit()
+        }
+    }
+
+    // TODO needs to display only the winning team's scores
+    override fun onDisplaySelected(scoreA: Int, scoreB: Int){
+        Log.d(TAG, "GameFragment display callback.")
+        val fragment = GameListFragment()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onStart() {

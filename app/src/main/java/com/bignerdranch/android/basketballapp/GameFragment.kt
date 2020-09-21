@@ -1,6 +1,7 @@
 package com.bignerdranch.android.basketballapp
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -22,6 +23,11 @@ private const val REQUEST_CODE_SAVE = 0
 
 class GameFragment : Fragment() {
 
+    interface Callbacks {
+        fun onDisplaySelected(scoreA: Int, scoreB: Int)
+    }
+    private var callbacks: Callbacks? = null
+
     private lateinit var teamAName: EditText
     private lateinit var teamBName: EditText
     private lateinit var threeAButton: Button
@@ -40,11 +46,20 @@ class GameFragment : Fragment() {
         ViewModelProviders.of(this).get(GameViewModel::class.java)
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -98,6 +113,7 @@ class GameFragment : Fragment() {
             resetScores()
         }
 
+        // TODO change this func
         saveButton.setOnClickListener {
             val scoreA = gameViewModel.currentScoreA
             val scoreB = gameViewModel.currentScoreB
@@ -119,6 +135,11 @@ class GameFragment : Fragment() {
                 )
             }
             startActivityForResult(intent, REQUEST_CODE_SAVE)
+        }
+
+        displayButton.setOnClickListener {
+            Log.i(TAG, "Clicked display button")
+            callbacks?.onDisplaySelected(gameViewModel.currentScoreA, gameViewModel.currentScoreB)
         }
 
         val currScoreA = savedInstanceState?.getInt(KEY_A_INDEX, 0) ?: 0
