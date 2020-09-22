@@ -1,5 +1,6 @@
 package com.bignerdranch.android.basketballapp
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.Display
@@ -14,22 +15,37 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_game.*
+import java.util.*
 
 private const val TAG = "GameListFragment"
+private const val ARG_WIN_TEAM_ID = "win_id"
 
 class GameListFragment : Fragment() {
 
+    interface Callbacks {
+        fun onGameSelected(gameID: UUID)
+        val GameListVM: GameListViewModel
+    }
+    private var callbacks: Callbacks? = null
     private lateinit var gameRecyclerView: RecyclerView
     private var adapter: GameAdapter? = null
+    private var GameListVM: GameListViewModel? = null
 
-    private val gameListViewModel: GameListViewModel by lazy {
-        ViewModelProviders.of(this).get(GameListViewModel::class.java)
+    private var winID:Int = -1
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
     }
-
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
-        Log.d(TAG, "# Games: ${gameListViewModel.gameList.size}")
+        winID = arguments?.getSerializable(ARG_WIN_TEAM_ID) as Int
+        Log.d(TAG, "args bundle winning team ID: $winID")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -39,20 +55,44 @@ class GameListFragment : Fragment() {
         gameRecyclerView = view.findViewById(R.id.game_recycler_view) as RecyclerView
         gameRecyclerView.layoutManager = LinearLayoutManager(context)
 
+        // Get winning games
+        GameListVM = callbacks!!.GameListVM
+        var games = GameListVM!!.gameList
+        games = getWinningGames(games)
+
         // Add adapter
-        val games = gameListViewModel.gameList
         adapter = GameAdapter(games)
         gameRecyclerView.adapter = adapter
 
         return view
     }
+
+    private fun getWinningGames(games: MutableList<Game>): MutableList<Game> {
+        val winningGames = mutableListOf<Game>()
+
+        for(game in games){
+            if(winID === 0 && game.scoreA > game.scoreB)
+                winningGames += game
+            else if(winID == 1 && game.scoreB > game.scoreA)
+                winningGames += game
+            else if(winID == 2 && game.scoreB === game.scoreA)
+                winningGames += game
+        }
+        return winningGames
+    }
+
     companion object {
-        fun newInstance(): GameListFragment {
-            return GameListFragment()
+        fun newInstance(winID: Int): GameListFragment {
+            val args = Bundle().apply {
+                putSerializable(ARG_WIN_TEAM_ID, winID)
+            }
+            return GameListFragment().apply {
+                arguments = args
+            }
         }
     }
 
-    private inner class GameHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private inner class GameHolder(view: View) : RecyclerView.ViewHolder(view) , View.OnClickListener {
 
         private lateinit var game: Game
 
@@ -64,6 +104,10 @@ class GameListFragment : Fragment() {
         private val teamAImageView: ImageView = itemView.findViewById(R.id.team_a_icon)
         private val teamBImageView: ImageView = itemView.findViewById(R.id.team_b_icon)
         private val tieImageView: ImageView = itemView.findViewById(R.id.tie_icon)
+
+        init {
+            itemView.setOnClickListener(this)
+        }
 
         fun bind(game: Game) {
             this.game = game
@@ -89,7 +133,10 @@ class GameListFragment : Fragment() {
                 teamAImageView.visibility = View.GONE
                 tieImageView.visibility = View.VISIBLE
             }
+        }
 
+        override fun onClick(v: View) {
+            callbacks?.onGameSelected(this.game.id)
         }
     }
 

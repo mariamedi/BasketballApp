@@ -1,6 +1,7 @@
 package com.bignerdranch.android.basketballapp
 
 import androidx.lifecycle.ViewModel
+import java.util.*
 
 class GameListViewModel : ViewModel() {
 
@@ -18,7 +19,7 @@ class GameListViewModel : ViewModel() {
 
             val gameID = "Game:$idx"
 
-            val game = Game(scoreA, scoreB, nameA, nameB, gameID, java.util.Calendar.getInstance())
+            val game = Game(scoreA, scoreB, nameA, nameB, gameID, java.util.Calendar.getInstance(), UUID.randomUUID())
 
             games += game
         }
@@ -36,4 +37,11 @@ class GameListViewModel : ViewModel() {
     }
     val gameList
         get() = games
+
+    fun getGame(gameID: UUID?): Game{
+        var gameIdx = games.indexOfFirst { it.id === gameID }
+        if(gameIdx != -1)
+            return games[gameIdx]
+        return Game(0, 0, "TeamA", "TeamB", "", Calendar.getInstance(), UUID.randomUUID())
+    }
 }

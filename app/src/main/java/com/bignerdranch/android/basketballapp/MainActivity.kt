@@ -3,10 +3,16 @@ package com.bignerdranch.android.basketballapp
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
+import java.util.*
 
 private const val TAG = "MainActivity"
 
-class MainActivity : AppCompatActivity(), GameFragment.Callbacks {
+class MainActivity : AppCompatActivity(), GameFragment.Callbacks, GameListFragment.Callbacks {
+
+    private val gameListViewModel: GameListViewModel by lazy {
+        ViewModelProviders.of(this).get(GameListViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,10 +30,22 @@ class MainActivity : AppCompatActivity(), GameFragment.Callbacks {
         }
     }
 
-    // TODO needs to display only the winning team's scores
-    override fun onDisplaySelected(scoreA: Int, scoreB: Int){
+    override val GameListVM: GameListViewModel
+        get() = gameListViewModel
+
+    override fun onDisplaySelected(winTeam: Int){
         Log.d(TAG, "GameFragment display callback.")
-        val fragment = GameListFragment()
+        val fragment = GameListFragment.newInstance(winTeam)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onGameSelected(gameID: UUID){
+        Log.d(TAG, "GameListFragment callback")
+        val fragment = GameFragment.newInstance(gameID)
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container, fragment)
