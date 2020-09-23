@@ -8,7 +8,7 @@ private const val TAG =  "GameViewModel"
 
 class GameViewModel : ViewModel() {
 
-    private val game = Game(0, 0, "TeamA", "TeamB", "", Calendar.getInstance(), UUID.randomUUID())
+    private val game = Game(0, 0, "TeamA", "TeamB", Date(), UUID.randomUUID())
 
     init {
         Log.d(TAG, "ViewModel instance created")
@@ -20,14 +20,6 @@ class GameViewModel : ViewModel() {
     fun increaseScoreB(points: Int) {
         game.scoreB += points
     }
-    fun resetGame() {
-        game.scoreA = 0
-        game.scoreB = 0
-        game.id = UUID.randomUUID()
-        game.nameA = "Team A"
-        game.nameB = "Team B"
-        game.date = Calendar.getInstance()
-    }
 
     val currentScoreA: Int
         get() = game.scoreA
@@ -35,11 +27,11 @@ class GameViewModel : ViewModel() {
     val currentScoreB: Int
         get() = game.scoreB
 
-    val currentNameA: String
-        get() = game.nameA
+    val currentGame: Game
+        get() = game
 
-    val currentNameB: String
-        get() = game.nameB
+    val currentId: UUID
+        get() = game.id
 
     fun setScoreA(points:Int) {
         game.scoreA = points

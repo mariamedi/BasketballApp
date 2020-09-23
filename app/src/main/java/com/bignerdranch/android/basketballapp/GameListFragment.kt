@@ -3,44 +3,49 @@ package com.bignerdranch.android.basketballapp
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.Display
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fragment_game.*
-import java.util.*
+import java.util.UUID
 
 private const val TAG = "GameListFragment"
 private const val ARG_WIN_TEAM_ID = "win_id"
 
 class GameListFragment : Fragment() {
 
+    private val gameListViewModel: GameListViewModel by lazy {
+        ViewModelProviders.of(this).get(GameListViewModel::class.java)
+    }
+
     interface Callbacks {
         fun onGameSelected(gameID: UUID)
-        val GameListVM: GameListViewModel
     }
     private var callbacks: Callbacks? = null
     private lateinit var gameRecyclerView: RecyclerView
-    private var adapter: GameAdapter? = null
-    private var GameListVM: GameListViewModel? = null
+    private var adapter: GameAdapter? = GameAdapter(emptyList())
 
     private var winID:Int = -1
 
+    /**
+     * Attaching callbacks
+     */
     override fun onAttach(context: Context) {
         super.onAttach(context)
         callbacks = context as Callbacks?
     }
+
     override fun onDetach() {
         super.onDetach()
         callbacks = null
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
@@ -54,20 +59,32 @@ class GameListFragment : Fragment() {
 
         gameRecyclerView = view.findViewById(R.id.game_recycler_view) as RecyclerView
         gameRecyclerView.layoutManager = LinearLayoutManager(context)
-
-        // Get winning games
-        GameListVM = callbacks!!.GameListVM
-        var games = GameListVM!!.gameList
-        games = getWinningGames(games)
-
-        // Add adapter
-        adapter = GameAdapter(games)
         gameRecyclerView.adapter = adapter
 
         return view
     }
 
-    private fun getWinningGames(games: MutableList<Game>): MutableList<Game> {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        gameListViewModel.gameListLiveData.observe(
+            viewLifecycleOwner,
+            Observer { games ->
+                games?.let {
+                    Log.i(TAG, "Got games ${games.size}")
+                    updateUI(games)
+                }
+            })
+    }
+
+    private fun updateUI(games: List<Game>) {
+        // Add adapter
+        var winningGames = getWinningGames(games)
+
+        adapter = GameAdapter(winningGames)
+        gameRecyclerView.adapter = adapter
+    }
+
+    private fun getWinningGames(games: List<Game>): List<Game> {
         val winningGames = mutableListOf<Game>()
 
         for(game in games){
@@ -96,7 +113,6 @@ class GameListFragment : Fragment() {
 
         private lateinit var game: Game
 
-        private val gameNameText: TextView = itemView.findViewById(R.id.game_name)
         private val gameDateText: TextView = itemView.findViewById(R.id.game_date)
         private val gamePlayersText: TextView = itemView.findViewById(R.id.game_players)
         private val gameScoresText: TextView = itemView.findViewById(R.id.game_score)
@@ -111,8 +127,7 @@ class GameListFragment : Fragment() {
 
         fun bind(game: Game) {
             this.game = game
-            gameNameText.setText(this.game.nameGame)
-            gameDateText.setText(this.game.date.time.toString())
+            gameDateText.setText(this.game.date.toString())
             gamePlayersText.setText(  "Team: " + this.game.nameA + " -- " + "Team: " + game.nameB)
             gameScoresText.setText(this.game.scoreA.toString() + " : " + game.scoreB)
 
@@ -157,6 +172,9 @@ class GameListFragment : Fragment() {
         }
     }
 
+    /**
+     * Lifecycle calls
+     */
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart() called")

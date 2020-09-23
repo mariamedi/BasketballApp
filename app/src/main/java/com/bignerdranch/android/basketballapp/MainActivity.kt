@@ -10,9 +10,6 @@ private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity(), GameFragment.Callbacks, GameListFragment.Callbacks {
 
-    private val gameListViewModel: GameListViewModel by lazy {
-        ViewModelProviders.of(this).get(GameListViewModel::class.java)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +26,6 @@ class MainActivity : AppCompatActivity(), GameFragment.Callbacks, GameListFragme
                 .commit()
         }
     }
-
-    override val GameListVM: GameListViewModel
-        get() = gameListViewModel
 
     override fun onDisplaySelected(winTeam: Int){
         Log.d(TAG, "GameFragment display callback.")
@@ -53,6 +47,19 @@ class MainActivity : AppCompatActivity(), GameFragment.Callbacks, GameListFragme
             .commit()
     }
 
+    override fun onResetGame(){
+        Log.d(TAG, "GameFragment callback")
+        val fragment = GameFragment()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    /**
+     * Lifecycle callbacks
+     */
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart() called")

@@ -13,6 +13,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import java.util.*
 
@@ -26,7 +27,7 @@ class GameFragment : Fragment() {
 
     interface Callbacks {
         fun onDisplaySelected(winTeam:Int)
-        val GameListVM: GameListViewModel
+        fun onResetGame()
     }
     private var callbacks: Callbacks? = null
 
@@ -44,11 +45,13 @@ class GameFragment : Fragment() {
     private lateinit var saveButton: Button
     private lateinit var displayButton: Button
 
-    private var GameListVM: GameListViewModel? = null
-    private var gameID:UUID? = UUID.randomUUID()
+    private var game: Game? = null
 
     private val gameViewModel: GameViewModel by lazy {
         ViewModelProviders.of(this).get(GameViewModel::class.java)
+    }
+    private val gameDetailViewModel: GameDetailViewModel by lazy {
+        ViewModelProviders.of(this).get(GameDetailViewModel::class.java)
     }
 
     override fun onAttach(context: Context) {
@@ -59,8 +62,9 @@ class GameFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
-        gameID =  arguments?.getSerializable(ARG_GAME_ID) as UUID?
+        val gameID =  arguments?.getSerializable(ARG_GAME_ID) as UUID?
         Log.d(TAG, "args bundle game ID: $gameID")
+        gameDetailViewModel.loadGame(gameID)
     }
 
     override fun onDetach() {
@@ -74,9 +78,6 @@ class GameFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
-
-        GameListVM = callbacks!!.GameListVM
-        Log.d(TAG, "Got a GameViewModel: $gameViewModel")
 
         teamAName = view.findViewById(R.id.team_a_name)
         teamBName = view.findViewById(R.id.team_b_name)
@@ -117,11 +118,11 @@ class GameFragment : Fragment() {
         }
 
         resetButton.setOnClickListener { view: View ->
-            resetScores()
+            callbacks?.onResetGame()
         }
 
-        // TODO change this func
         saveButton.setOnClickListener {
+            // Send over scores to send email
             val scoreA = gameViewModel.currentScoreA
             val scoreB = gameViewModel.currentScoreB
 
@@ -132,6 +133,14 @@ class GameFragment : Fragment() {
                 teamA = "Team A"
             if (teamB.trim().isEmpty())
                 teamA = "Team B"
+
+            // Save game in the database
+            if(game != null){
+                gameDetailViewModel.updateGame(Game(scoreA, scoreB, teamA, teamB, gameViewModel.currentGame.date, gameDetailViewModel.gameLiveData.value!!.id))
+                Log.i(TAG, "Updating Game with id ${gameDetailViewModel.gameLiveData.value!!.id}")
+                }
+            else
+                gameDetailViewModel.saveGame(Game(scoreA, scoreB, teamA, teamB, Date(), gameViewModel.currentId))
 
             val intent = activity?.let { it1 -> SaveActivity.newIntent(
                     it1,
@@ -146,8 +155,10 @@ class GameFragment : Fragment() {
 
         displayButton.setOnClickListener {
             Log.i(TAG, "Clicked display button")
+
             val scoreA = gameViewModel.currentScoreA
             val scoreB = gameViewModel.currentScoreB
+
             var winTeam = 2 // TIE
 
             if ( scoreA > scoreB )
@@ -158,27 +169,39 @@ class GameFragment : Fragment() {
             callbacks?.onDisplaySelected(winTeam)
         }
 
-        var game = GameListVM!!.getGame(gameID)
-        teamAName.setText(game.nameA)
-        teamBName.setText(game.nameB)
-        scoreATextView.text = game.scoreA.toString()
-        scoreBTextView.text = game.scoreB.toString()
-
         if(savedInstanceState != null) {
             val currScoreA = savedInstanceState?.getInt(KEY_A_INDEX, 0) ?: 0
             val currScoreB = savedInstanceState?.getInt(KEY_B_INDEX, 0) ?: 0
             gameViewModel.setScoreA(currScoreA)
             gameViewModel.setScoreB(currScoreB)
         }
-        else {
-            gameViewModel.setScoreA(game.scoreA)
-            gameViewModel.setScoreB(game.scoreB)
-        }
 
         updateScores()
 
         return view
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        gameDetailViewModel.gameLiveData.observe(
+            viewLifecycleOwner,
+            Observer { game ->
+                game?.let {
+                    this.game = game
+                    updateUI()
+                }
+            })
+    }
+
+    private fun updateUI() {
+        teamAName.setText(game?.nameA)
+        teamBName.setText(game?.nameB)
+        scoreATextView.text = game?.scoreA.toString()
+        scoreBTextView.text = game?.scoreB.toString()
+        gameViewModel.setScoreA(game!!.scoreA)
+        gameViewModel.setScoreB(game!!.scoreB)
+    }
+
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         Log.i(TAG, "onSaveInstanceState")
@@ -197,7 +220,7 @@ class GameFragment : Fragment() {
 
         if (requestCode == REQUEST_CODE_SAVE) {
             if (data!!.getBooleanExtra(EXTRA_Score_Saved, false )){
-                Toast.makeText(activity, "Scores were \"saved\"", Toast.LENGTH_LONG)
+                Toast.makeText(activity, "Game saved.", Toast.LENGTH_LONG)
                     .show()
                 Log.d(TAG, "Toast shown")
             }
@@ -241,15 +264,6 @@ class GameFragment : Fragment() {
         scoreBTextView.setText(scoreB.toString())
     }
 
-    private fun resetScores() {
-        gameViewModel.resetGame()
-        val scoreA = gameViewModel.currentScoreA
-        val scoreB = gameViewModel.currentScoreB
-        scoreATextView.setText(scoreA.toString())
-        scoreBTextView.setText(scoreB.toString())
-        teamAName.setText(gameViewModel.currentNameA)
-        teamBName.setText(gameViewModel.currentNameB)
-    }
     private fun updateScores() {
         val scoreA = gameViewModel.currentScoreA
         val scoreB = gameViewModel.currentScoreB
@@ -257,7 +271,7 @@ class GameFragment : Fragment() {
         scoreBTextView.setText(scoreB.toString())
     }
     companion object {
-        fun newInstance(gameID: UUID): GameFragment {
+        fun newInstance(gameID: UUID?): GameFragment {
             val args = Bundle().apply {
                 putSerializable(ARG_GAME_ID, gameID)
             }
